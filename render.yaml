@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: simba-backend
+    env: node
+    plan: free
+    rootDir: backend
+    buildCommand: yarn && yarn build
+    startCommand: yarn start:prod
+    envVars:
+      - key: PORT
+        value: 10000
+    autoDeploy: false
