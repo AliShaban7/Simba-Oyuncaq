@@ -6,6 +6,7 @@ import { useAuthStore } from '../store/authStore';
 interface Product {
   _id: string;
   name: string;
+  category?: string;
   brand?: string;
   costPrice: number;
   salePrice: number;
@@ -26,10 +27,24 @@ export default function Products() {
   const [priceTab, setPriceTab] = useState<'retail' | 'wholesale'>('retail');
   const [showScanModal, setShowScanModal] = useState(false);
   const [scanBarcode, setScanBarcode] = useState('');
-  const { user } = useAuthStore();
+  const { user: _user } = useAuthStore();
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/products');
+      setProducts(response.data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      showNotification('Məhsulları yükləmək mümkün olmadı', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const showNotification = (message: string, type: 'success' | 'error') => {
@@ -186,107 +201,119 @@ export default function Products() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center h-full">
+        <div className="flex items-center justify-center flex-1">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
             <p className="text-sm lg:text-base text-gray-600">Yüklənir...</p>
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow overflow-hidden h-full flex flex-col">
+        <div className="bg-white rounded-lg shadow overflow-hidden flex-1 flex flex-col">
           <div className="overflow-x-auto flex-1">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-secondary text-white sticky top-0 z-10">
                 <tr>
-                    <th className="px-3 lg:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Ad</th>
-                    <th className="px-3 lg:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden sm:table-cell">Kateqoriya</th>
-                    <th className="px-3 lg:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden md:table-cell">Alış Qiyməti</th>
-                    <th className="px-3 lg:px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
-                      <div className="flex items-center justify-center gap-2">
+                  <th className="px-3 lg:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Ad</th>
+                  <th className="px-3 lg:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden sm:table-cell">
+                    Kateqoriya
+                  </th>
+                  <th className="px-3 lg:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden md:table-cell">
+                    Alış Qiyməti
+                  </th>
+                  <th className="px-3 lg:px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setPriceTab('retail')}
+                        className={`px-2 py-1 text-xs rounded transition-colors ${
+                          priceTab === 'retail'
+                            ? 'bg-white text-secondary'
+                            : 'text-white hover:bg-white hover:bg-opacity-20'
+                        }`}
+                      >
+                        Pərakəndə
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPriceTab('wholesale')}
+                        className={`px-2 py-1 text-xs rounded transition-colors ${
+                          priceTab === 'wholesale'
+                            ? 'bg-white text-secondary'
+                            : 'text-white hover:bg-white hover:bg-opacity-20'
+                        }`}
+                      >
+                        Topdan
+                      </button>
+                    </div>
+                  </th>
+                  <th className="px-3 lg:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden lg:table-cell">
+                    Barkod
+                  </th>
+                  <th className="px-3 lg:px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">
+                    Əməliyyatlar
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredProducts.map((product) => (
+                  <tr key={product._id} className="hover:bg-gray-50">
+                    <td className="px-3 lg:px-6 py-4">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 truncate max-w-[120px] lg:max-w-none">
+                          {product.name}
+                        </p>
+                        <p className="text-xs text-gray-500 sm:hidden">{product.category || '-'}</p>
+                        <p className="text-xs text-gray-500 md:hidden">Alış: {product.costPrice.toFixed(2)} AZN</p>
+                      </div>
+                    </td>
+                    <td className="px-3 lg:px-6 py-4 text-sm text-gray-900 hidden sm:table-cell">
+                      <span className="truncate block max-w-[100px] lg:max-w-none">
+                        {product.category || '-'}
+                      </span>
+                    </td>
+                    <td className="px-3 lg:px-6 py-4 text-sm text-gray-900 hidden md:table-cell">
+                      {product.costPrice.toFixed(2)} AZN
+                    </td>
+                    <td className="px-3 lg:px-6 py-4 text-sm font-semibold text-gray-900 text-center">
+                      {priceTab === 'retail'
+                        ? (product.retailPrice || product.salePrice || 0).toFixed(2)
+                        : (product.wholesalePrice || 0).toFixed(2)} AZN
+                    </td>
+                    <td className="px-3 lg:px-6 py-4 text-sm text-gray-900 hidden lg:table-cell">
+                      <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded">
+                        {product.barcode || '-'}
+                      </span>
+                    </td>
+                    <td className="px-3 lg:px-6 py-4">
+                      <div className="flex items-center justify-center gap-1 lg:gap-3">
                         <button
-                          type="button"
-                          onClick={() => setPriceTab('retail')}
-                          className={`px-2 py-1 text-xs rounded transition-colors ${
-                            priceTab === 'retail' 
-                              ? 'bg-white text-secondary' 
-                              : 'text-white hover:bg-white hover:bg-opacity-20'
-                          }`}
+                          onClick={() => {
+                            setEditingProduct(product);
+                            setShowModal(true);
+                          }}
+                          className="text-primary hover:text-opacity-80 p-1"
+                          title="Redaktə et"
                         >
-                          Pərakəndə
+                          <Edit className="w-4 h-4" />
                         </button>
                         <button
-                          type="button"
-                          onClick={() => setPriceTab('wholesale')}
-                          className={`px-2 py-1 text-xs rounded transition-colors ${
-                            priceTab === 'wholesale' 
-                              ? 'bg-white text-secondary' 
-                              : 'text-white hover:bg-white hover:bg-opacity-20'
-                          }`}
+                          onClick={() => handleDelete(product._id)}
+                          className="text-red-600 hover:text-red-800 p-1"
+                          title="Sil"
                         >
-                          Topdan
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
-                    </th>
-                    <th className="px-3 lg:px-6 py-3 text-left text-xs font-medium uppercase tracking-wider hidden lg:table-cell">Barkod</th>
-                    <th className="px-3 lg:px-6 py-3 text-center text-xs font-medium uppercase tracking-wider">Əməliyyatlar</th>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredProducts.map((product) => (
-                    <tr key={product._id} className="hover:bg-gray-50">
-                      <td className="px-3 lg:px-6 py-4">
-                        <div>
-                          <p className="text-sm font-medium text-gray-900 truncate max-w-[120px] lg:max-w-none">{product.name}</p>
-                          <p className="text-xs text-gray-500 sm:hidden">{product.category || '-'}</p>
-                          <p className="text-xs text-gray-500 md:hidden">Alış: {product.costPrice.toFixed(2)} AZN</p>
-                        </div>
-                      </td>
-                      <td className="px-3 lg:px-6 py-4 text-sm text-gray-900 hidden sm:table-cell">
-                        <span className="truncate block max-w-[100px] lg:max-w-none">{product.category || '-'}</span>
-                      </td>
-                      <td className="px-3 lg:px-6 py-4 text-sm text-gray-900 hidden md:table-cell">
-                        {product.costPrice.toFixed(2)} AZN
-                      </td>
-                      <td className="px-3 lg:px-6 py-4 text-sm font-semibold text-gray-900 text-center">
-                        {priceTab === 'retail' 
-                          ? (product.retailPrice || product.salePrice || 0).toFixed(2)
-                          : (product.wholesalePrice || 0).toFixed(2)
-                        } AZN
-                      </td>
-                      <td className="px-3 lg:px-6 py-4 text-sm text-gray-900 hidden lg:table-cell">
-                        <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded">
-                          {product.barcode || '-'}
-                        </span>
-                      </td>
-                      <td className="px-3 lg:px-6 py-4">
-                        <div className="flex items-center justify-center gap-1 lg:gap-3">
-                          <button
-                            onClick={() => {
-                              setEditingProduct(product);
-                              setShowModal(true);
-                            }}
-                            className="text-primary hover:text-opacity-80 p-1"
-                            title="Redaktə et"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(product._id)}
-                            className="text-red-600 hover:text-red-800 p-1"
-                            title="Sil"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </div>  
-      )}      
+        </div>
+      )}
+
+      </div>
 
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

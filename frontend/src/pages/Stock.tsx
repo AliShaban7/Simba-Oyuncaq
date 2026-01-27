@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/api';
-import { Package, ArrowRightLeft, Plus, QrCode, Search } from 'lucide-react';
+import { QrCode } from 'lucide-react';
 
 interface StockBalance {
   _id: string;

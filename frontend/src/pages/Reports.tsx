@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/api';
-import { BarChart3, TrendingUp, Package, DollarSign } from 'lucide-react';
+import { BarChart3, Package, DollarSign } from 'lucide-react';
 
 export default function Reports() {
   const [salesReport, setSalesReport] = useState<any[]>([]);
@@ -52,7 +52,6 @@ export default function Reports() {
   };
 
   const totalSales = salesReport.reduce((sum, sale) => sum + (sale.total || 0), 0);
-  const totalItems = salesReport.reduce((sum, sale) => sum + (sale.items?.length || 0), 0);
 
   return (
     <div className="px-4 py-6">

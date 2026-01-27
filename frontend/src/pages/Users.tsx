@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/api';
-import { Plus, Edit, Trash2, UserCog } from 'lucide-react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
 interface User {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/api';
-import { Plus, Edit, Trash2, Search, DollarSign } from 'lucide-react';
+import { Plus, Edit, Trash2, Search } from 'lucide-react';
 
 interface Customer {
   _id: string;

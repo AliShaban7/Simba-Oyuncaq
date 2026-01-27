@@ -39,7 +39,7 @@ interface LabelItem {
 }
 
 export default function BarcodeGenerator() {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [_products, setProducts] = useState<Product[]>([]);
   const [variants, setVariants] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLabels, setSelectedLabels] = useState<LabelItem[]>([]);
@@ -47,7 +47,7 @@ export default function BarcodeGenerator() {
   const [labelSize, setLabelSize] = useState<'small' | 'medium' | 'large'>('medium');
   const [showPrice, setShowPrice] = useState(true);
   const [loading, setLoading] = useState(true);
-  const [barcodeType, setBarcodeType] = useState<'all' | 'primary' | 'internal' | 'manufacturer'>('primary');
+  const [barcodeType, _setBarcodeType] = useState<'all' | 'primary' | 'internal' | 'manufacturer'>('primary');
   const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -153,7 +153,6 @@ export default function BarcodeGenerator() {
 
     // Use first available barcode
     const barcode = availableBarcodes[0];
-    const key = `${variant._id}-${barcode._id}`;
     
     const existing = selectedLabels.find((item) => 
       item.variant._id === variant._id && item.barcode._id === barcode._id
@@ -227,7 +226,7 @@ export default function BarcodeGenerator() {
         }
       }
     `,
-  });
+  } as any);
 
   const handleDownloadPDF = async () => {
     if (!printRef.current || selectedLabels.length === 0) return;
@@ -524,7 +523,7 @@ export default function BarcodeGenerator() {
               <div className="pt-4 border-t space-y-3">
                 <button
                   onClick={handleDownloadPDF}
-                  disabled={selectedProducts.length === 0}
+                  disabled={selectedLabels.length === 0}
                   className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <FileDown className="w-5 h-5" />
@@ -532,7 +531,7 @@ export default function BarcodeGenerator() {
                 </button>
                 <button
                   onClick={handlePrint}
-                  disabled={selectedProducts.length === 0}
+                  disabled={selectedLabels.length === 0}
                   className="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <Printer className="w-5 h-5" />
@@ -553,7 +552,7 @@ export default function BarcodeGenerator() {
               const attributes = Object.entries(item.variant.attributes || {})
                 .map(([key, val]) => `${key}: ${val}`)
                 .join(', ');
-              
+
               return (
                 <div
                   key={`${item.variant._id}-${item.barcode._id}-${index}`}

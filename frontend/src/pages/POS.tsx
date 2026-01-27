@@ -1,10 +1,11 @@
 import { useEffect, useState, useRef } from 'react';
 import api from '../api/api';
-import { ShoppingCart, X, Plus, Minus, Trash2, CreditCard, DollarSign } from 'lucide-react';
+import { ShoppingCart, Plus, Minus, Trash2 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 
 interface CartItem {
   productId: string;
+  variantId?: string;
   productName: string;
   quantity: number;
   unitPrice: number;
