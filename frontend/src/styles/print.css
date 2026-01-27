@@ -1,0 +1,60 @@
+/* Print styles for Xprinter thermal printers */
+
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: white;
+  }
+
+  .print-label {
+    width: 58mm !important;
+    min-height: 40mm;
+    max-width: 58mm;
+    margin: 0;
+    padding: 2mm;
+    page-break-after: always;
+    page-break-inside: avoid;
+    border: 1px solid #000;
+    box-sizing: border-box;
+  }
+
+  .print-label.w-80mm {
+    width: 80mm !important;
+    max-width: 80mm;
+  }
+
+  .print-container {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  canvas {
+    max-width: 100% !important;
+    height: auto !important;
+    display: block;
+    margin: 0 auto;
+  }
+
+  /* Hide everything except print content */
+  body > *:not(.print-container) {
+    display: none !important;
+  }
+}
+
+/* For 80mm printers */
+@media print and (min-width: 80mm) {
+  .print-label {
+    width: 80mm !important;
+    max-width: 80mm;
+  }
+}
+
+
