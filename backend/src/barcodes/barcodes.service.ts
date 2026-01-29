@@ -13,7 +13,7 @@ export class BarcodesService {
     private countersService: CountersService,
     private productVariantsService: ProductVariantsService,
     private auditLogsService: AuditLogsService,
-  ) {}
+  ) { }
 
   async findByValue(value: string): Promise<BarcodeDocument | null> {
     return this.barcodeModel
@@ -191,16 +191,28 @@ export class BarcodesService {
   }
 
   async lookup(value: string): Promise<{ variant: any; barcode: BarcodeDocument } | null> {
-    const barcode = await this.findByValue(value);
-    if (!barcode) {
-      return null;
-    }
+    try {
+      const barcode = await this.findByValue(value);
+      if (!barcode) {
+        return null;
+      }
 
-    const variant = await this.productVariantsService.findById(barcode.variantId.toString());
-    return {
-      variant: variant.toObject(),
-      barcode: barcode.toObject(),
-    };
+      const variant = await this.productVariantsService.findById(barcode.variantId.toString());
+      if (!variant) {
+        throw new NotFoundException('Variant tapılmadı');
+      }
+
+      // Convert to plain object and ensure productId is populated
+      const variantObj = variant.toObject();
+
+      return {
+        variant: variantObj,
+        barcode: barcode.toObject(),
+      };
+    } catch (error) {
+      console.error('Error in barcode lookup:', error);
+      throw error;
+    }
   }
 }
 

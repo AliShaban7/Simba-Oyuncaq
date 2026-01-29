@@ -35,6 +35,9 @@ export class StockMovement {
   @Prop()
   note?: string;
 
+  @Prop()
+  costPrice?: number; // For tracking purchase cost in receipts
+
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   createdBy: Types.ObjectId;
 
